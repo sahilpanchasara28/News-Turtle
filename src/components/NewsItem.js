@@ -22,7 +22,7 @@ export default function NewsItem(props) {
         <img
           src={imgurl ? imgurl : defaultImg}
           className="card-img-top"
-          alt="image"
+          alt="news"
         />
         <div className="card-body">
           <h5 className="card-title">{title}</h5>
@@ -33,7 +33,7 @@ export default function NewsItem(props) {
               {new Date(date).toGMTString()}
             </small>
           </p>
-          <a href={newsurl} target="_blank" className="btn btn-sm btn-primary">
+          <a href={newsurl} target="_blank" rel="noreferrer" className="btn btn-sm btn-primary">
             Read More
           </a>
         </div>
