@@ -4,10 +4,10 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Spinner from "./Spinner";
 
 export default function CustomSearch(props) {
-  const [articles, setarticles] = useState([]);
-  const [loading, setloading] = useState(true);
-  const [totalResults, settotalResults] = useState(0);
-  const [page, setpage] = useState(1);
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [totalResults, setTotalResults] = useState(0);
+  const [page, setPage] = useState(1);
   const [keyword, setkeyword] = useState("all");
 
   const capitalize = (string) => {
@@ -16,36 +16,38 @@ export default function CustomSearch(props) {
 
   const updatePage = async () => {
     props.setProgress(10);
-
-    let apiurl = `https://newsapi.org/v2/everything?q=${keyword}&apiKey=${props.apiKey}&page=${page}`;
-
-    let data = await fetch(apiurl);
+    const url = `https://newsapi.org/v2/everything?q=${keyword}&apiKey=${props.apiKey}&page=${page}`;
+    setLoading(true);
+    let data = await fetch(url);
     props.setProgress(30);
-    let parseddata = await data.json();
-    props.setProgress(60);
-
-    setarticles(parseddata.articles);
-    settotalResults(parseddata.totalResults);
-    setloading(false);
-
+    let parsedData = await data.json();
+    props.setProgress(70);
+    setArticles(parsedData.articles);
+    setTotalResults(parsedData.totalResults);
+    setLoading(false);
     props.setProgress(100);
   };
 
   useEffect(() => {
     document.title = "NewsTurtle - " + capitalize(props.category);
     updatePage();
+    // eslint-disable-next-line
   }, []);
 
   const fetchMoreData = async () => {
-    setpage(page + 1);
-
-    let apiurl = `https://newsapi.org/v2/everything?q=${keyword}&apiKey=${props.apiKey}&page=${page}`;
-
-    let data = await fetch(apiurl);
-    let parseddata = await data.json();
-
-    setarticles(parseddata.articles.concat(parseddata.articles));
-    settotalResults(parseddata.totalResults);
+    const url = `https://newsapi.org/v2/everything?q=${keyword}&apiKey=${props.apiKey}&page=${page}`;
+    setPage(page + 1);
+    let data = await fetch(url);
+    let parsedData = await data.json();
+    if (parsedData.status === "error") {
+      alert("can't fetch more...");
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } else {
+      setArticles(articles.concat(parsedData.articles));
+      setTotalResults(parsedData.totalResults);
+    }
   };
 
   const handleChange = (e) => {
@@ -58,12 +60,12 @@ export default function CustomSearch(props) {
         className="text-center"
         style={{ margin: "35px 0px", marginTop: "90px" }}
       >
-        Top Headlines - {capitalize(props.category)}
+        {capitalize(props.category)} - {capitalize(keyword)}
       </h1>
       {loading && <Spinner />}
 
       <div className="w-25 mx-auto d-flex">
-        <form>
+ 
           <input
             type="text"
             value={keyword}
@@ -82,7 +84,7 @@ export default function CustomSearch(props) {
           >
             Submit
           </button>
-        </form>
+     
       </div>
       <InfiniteScroll
         dataLength={articles.length}

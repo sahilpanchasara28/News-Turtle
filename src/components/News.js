@@ -4,12 +4,11 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Spinner from "./Spinner";
 
 export default function News(props) {
-  const [articles, setarticles] = useState([]);
-  const [loading, setloading] = useState(true);
-  const [totalResults, settotalResults] = useState(0);
-  const [page, setpage] = useState(1);
-  const [country, setcountry] = useState("IN");
-  let pgSize = 10;
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [totalResults, setTotalResults] = useState(0);
+  const [page, setPage] = useState(1);
+  const [country, setCountry] = useState("IN");
 
   const capitalize = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -17,40 +16,37 @@ export default function News(props) {
 
   const updatePage = async () => {
     props.setProgress(10);
-
-    let apiurl = `https://newsapi.org/v2/top-headlines?category=${props.category}&country=${country}&apiKey=${props.apiKey}&page=${page}&pageSize=${pgSize}`;
-
-    let data = await fetch(apiurl);
+    const url = `https://newsapi.org/v2/top-headlines?category=${props.category}&country=${country}&apiKey=${props.apiKey}&page=${page}`;
+    setLoading(true);
+    let data = await fetch(url);
     props.setProgress(30);
-    let parseddata = await data.json();
-    props.setProgress(60);
-
-    setarticles(parseddata.articles);
-    settotalResults(parseddata.totalResults);
-    setloading(false);
-
+    let parsedData = await data.json();
+    props.setProgress(70);
+    setArticles(parsedData.articles);
+    setTotalResults(parsedData.totalResults);
+    setLoading(false);
     props.setProgress(100);
   };
 
   useEffect(() => {
     document.title = "NewsTurtle - " + capitalize(props.category);
     updatePage();
+    // eslint-disable-next-line
   }, []);
 
   const handleChange = (e) => {
-    setcountry(e.target.value);
+    setCountry(e.target.value);
   };
 
   const fetchMoreData = async () => {
-    setpage(page + 1);
-
-    let apiurl = `https://newsapi.org/v2/top-headlines?category=${props.category}&country=${country}&apiKey=${props.apiKey}&page=${page}&pageSize=${pgSize}`;
-
-    let data = await fetch(apiurl);
-    let parseddata = await data.json();
-
-    setarticles(parseddata.articles.concat(parseddata.articles));
-    settotalResults(parseddata.totalResults);
+    const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${
+      props.category
+    }&apiKey=${props.apiKey}&page=${page + 1}`;
+    setPage(page + 1);
+    let data = await fetch(url);
+    let parsedData = await data.json();
+    setArticles(articles.concat(parsedData.articles));
+    setTotalResults(parsedData.totalResults);
   };
 
   return (
@@ -59,7 +55,7 @@ export default function News(props) {
         className="text-center"
         style={{ margin: "35px 0px", marginTop: "90px" }}
       >
-        Top Headlines - {capitalize(props.category)}
+        Top Headlines - {capitalize(props.category)} ({country})
       </h1>
       {loading && <Spinner />}
 
